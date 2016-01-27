@@ -1,0 +1,192 @@
+<html>
+	<!-- gruntで自動生成されました。 -->
+	<head>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+		<!-- bower:css -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+		<!-- endbower -->
+		<style>
+			.x-draggable{
+				margin:10px;
+				padding:10px;
+				border:1px solid #EEEEEE;
+				z-index:9;
+				cursor:pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- bower:js -->
+		<script src="https://code.jquery.com/jquery-2.2.0.js"></script>
+		<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+		<!-- endbower -->
+
+		<div class="row">
+			<div class="col-xs-3" style="border:1px black solid">
+				<button class="btn btn-default" id="x-add-button">ボタン</button><br>
+				<button class="btn btn-default" id="x-add-text">text</button><br>
+				<button class="btn btn-default" id="x-add-table">table</button><br>
+
+				<hr>
+				<div>
+					target:<label id="x-editable-target"></label><br>
+					<div id="x-detail-options">
+					</div>
+					<!--
+					value :<input type="text" id="x-editable-value"><br>
+					class :<label id="x-editable-class"></label><br>
+					style :<label id="x-editable-style"></label><br>
+					-->
+
+					<input type="button" id="x-element-change" value="change">
+				</div>
+			</div>
+			<div class="col-xs-8">
+				<div id="x-output-layout" style="border:1px black solid;height:100%;">
+
+				</div>
+			</div>
+		</div>
+		<script language="javascript">
+
+$(function(){
+	//alert("init");	
+	$("#x-add-button").on("click",function(){
+		var uid = _.uniqueId("btn_");
+		var button = "<input type=\"button\" id=\"" + uid + "\" class=\"btn btn-default editable\" value=\"dummy\">";
+		draggable(output(uid,button));
+	});
+
+	$("#x-add-text").on("click",function(){
+		var uid = _.uniqueId("text_");
+		var button = "<input type=\"text\" id=\"" + uid + "\" class=\"editable\" value=\"dummy\">";
+		draggable(output(uid,button));
+	});
+	$("#x-add-table").on("click",function(){
+		var uid = _.uniqueId("table_");
+		var button = "<table id=\"" + uid + "\" class=\"editable\"><thead><tr><td>項目</td></tr></thead><tbody><tr><td>セル</td></tr></tbody></table>";
+		draggable(output(uid,button));
+	});
+
+	$("#x-element-change").on("click",function(){
+		var target = $("#" + $("#x-editable-target").text())[0];
+		/*
+		target.val($("#x-editable-value").val());
+		*/
+		var tagName = $(target)[0].tagName;
+		if(tagName.toUpperCase()=="table".toUpperCase()){
+			var val = [];
+			var trows = $("#x-editable-value").val().split("\n");
+			_.each(trows,function(row){
+				val.push(row.split(","));
+			});
+			var ths = $("#x-editable-title").val().split(",");
+			
+			tableApply(target,$("#x-editable-class").prop("checked"),ths,val);
+		}else if(tagName.toUpperCase()=="input".toUpperCase()){
+			if($(target).attr("type").toUpperCase()=="TEXT"){
+				textApply();
+			}else if($(target).attr("type").toUpperCase()=="BUTTON"){
+				buttonApply(target);
+			}
+		}else{
+
+		}
+	});
+
+	/*
+	$("#x-output-layout").droppable({
+		drop:function(events,id){
+			console.log("test");
+		}
+	});
+	*/
+	$("#x-output-layout").droppable({
+		drop:function(events,id){
+			//console.log(id);
+		}
+	});
+
+	$("#x-output-layout").on("click",".editable",function(elm){
+		//console.log($(elm.currentTarget)[0].tagName);
+		var form = $(elm.currentTarget)[0];
+		var tagName = form.tagName;
+
+		$("#x-editable-target").text(elm.currentTarget.id);
+		$("#x-detail-options").empty();
+		if(tagName.toUpperCase()=="table".toUpperCase()){
+			var elm = $(elm.currentTarget).val();
+			$("#x-detail-options").append("title :<input id=\"x-editable-title\" value=\"test1\"><br>");
+			$("#x-detail-options").append("table-class :<input type=\"checkbox\" id=\"x-editable-class\" checked><br>");
+			$("#x-detail-options").append("value :<textarea id=\"x-editable-value\">" + "test1" +  "</textarea><br>");
+
+		}else if(tagName.toUpperCase()=="input".toUpperCase()){
+			console.log("input");
+			if($(form).attr("type").toUpperCase()=="TEXT"){
+				console.log("text");
+				//$("#x-editable-value").val($(elm.currentTarget).val());
+				//$("#x-editable-class").text($(elm.currentTarget)[0].classList);
+			}else if($(form).attr("type").toUpperCase()=="BUTTON"){
+				console.log("button");
+				$("#x-detail-options").empty();
+				$("#x-detail-options").append("value :<input type=\"text\" id=\"x-editable-value\" value=\"" + $(elm.currentTarget).val() +  "\"><br>");
+				//$("#x-editable-value").val($(elm.currentTarget).val());
+				//$("#x-editable-class").text($(elm.currentTarget)[0].classList);
+			}
+		}else{
+			//それ以外
+		}
+	});
+});
+
+function output(uid,elm){
+		var draggable = "<label class=\"x-draggable\">" + elm + "</label>";
+		$("#x-output-layout").append(draggable);
+		$(".x-draggable").draggable();
+		return $("#" + uid);
+}
+
+function draggable(elm){
+	$(".x-draggable").draggable();
+	return elm;
+}
+
+function buttonApply(target){
+	console.log("button");
+	console.log(target);
+	$(target).val($("#x-editable-value").val());
+}
+
+function textApply(){
+	console.log("text");
+}
+
+function tableApply(target,tclass,headers,tables){
+	console.log("table");
+	var id = $(target)[0].id;
+	$("#" + id).toggleClass("table",tclass);
+	$("#" + id).toggleClass("striped",tclass);
+	$("#" + id + " thead").empty();
+	$("#" + id + " tbody").empty();
+
+
+	$("#" + id + " thead").append("<tr>");
+	_.each(headers,function(col){
+		$("#" + id + " thead").append("<th>" + col + "</th>");
+	});
+	$("#" + id + " thead").append("</tr>");
+	var html="";
+	_.each(tables,function(rows){
+		html += "<tr>";
+		_.each(rows,function(col){
+			html += "<td>" + col + "</td>";
+		});
+		html += "</tr>";
+	});
+	$("#" + id + " tbody").append(html);
+}
+		</script>
+	</body>
+</html>
